@@ -1,11 +1,13 @@
 package com.abcode.taskproject.controller;
 
+import com.abcode.taskproject.entity.Email;
 import com.abcode.taskproject.payload.JWTAuthResponse;
 import com.abcode.taskproject.payload.LoginDto;
 import com.abcode.taskproject.payload.UserDto;
 import com.abcode.taskproject.security.JwtTokenProvider;
+import com.abcode.taskproject.service.SendMailService;
 import com.abcode.taskproject.service.UserService;
-import io.jsonwebtoken.Jwts;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,12 +20,15 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.validation.Valid;
+
 @RestController
+@Slf4j
 @RequestMapping("/api/auth")
 public class AuthController {
 
     // Auto-wire userService
-    private UserService userService;
+    private final UserService userService;
 
     @Autowired
     public AuthController(UserService userService) {
@@ -38,12 +43,31 @@ public class AuthController {
     @Autowired
     private JwtTokenProvider jwtTokenProvider;
 
-    // register
-    @PostMapping("/register")
-    public ResponseEntity<UserDto> createUser(@RequestBody UserDto userDto){
-       return new ResponseEntity<>( userService.createUser(userDto), HttpStatus.CREATED);
-    }
+    // auto wire the mail service
+    @Autowired
+    private SendMailService sendMailService;
 
+
+    // register and send email
+    @PostMapping("/register")
+    public ResponseEntity<UserDto> register(@Valid @RequestBody UserDto userDto) throws Exception {
+        UserDto savedUser = userService.createUser(userDto);
+        // get details from the userDto
+        String email = userDto.getEmail();
+        String subject = "Welcome to Task Project";
+        String body = "Hello welcome to Task Project";
+
+        // send email
+        Email emailDetails = Email.builder()
+                .recipient(email)
+                .subject(subject)
+                .msgBody(body)
+                .build();
+           sendMailService.sendMail(emailDetails);
+
+
+        return new ResponseEntity<>(savedUser, HttpStatus.CREATED);
+    }
     // login
     @PostMapping("/login")
     public ResponseEntity<JWTAuthResponse> loginUser(@RequestBody LoginDto loginDto){
