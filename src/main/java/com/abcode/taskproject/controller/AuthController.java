@@ -78,7 +78,7 @@ public class AuthController {
     }
     // login
     @PostMapping("/login")
-    public ResponseEntity<JWTAuthResponse> loginUser(@RequestBody LoginDto loginDto){
+    public ResponseEntity<?> loginUser(@RequestBody LoginDto loginDto){
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(loginDto.getEmail(), loginDto.getPassword())
         );
@@ -88,7 +88,15 @@ public class AuthController {
         // Generate token and return it
         String  token = jwtTokenProvider.generateToken(authentication);
 
-        return ResponseEntity.ok(new JWTAuthResponse(token));
+        ApiResponse apiResponse = ApiResponse.builder()
+                .isSuccessful(true)
+                .body(new JWTAuthResponse(token))
+                .timeStamp(LocalDateTime.now())
+                .code("200")
+                .build();
+
+
+        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 
 
