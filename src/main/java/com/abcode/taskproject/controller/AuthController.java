@@ -65,6 +65,9 @@ public class AuthController {
                 .build();
            sendMailService.sendMail(emailDetails);
 
+           //log success if email is sent
+              log.info("Email sent successfully to: " + email);
+
 
         return new ResponseEntity<>(savedUser, HttpStatus.CREATED);
     }
