@@ -1,6 +1,7 @@
 package com.abcode.taskproject.controller;
 
 import com.abcode.taskproject.entity.Email;
+import com.abcode.taskproject.payload.ApiResponse;
 import com.abcode.taskproject.payload.JWTAuthResponse;
 import com.abcode.taskproject.payload.LoginDto;
 import com.abcode.taskproject.payload.UserDto;
@@ -21,6 +22,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
+import java.time.LocalDateTime;
 
 @RestController
 @Slf4j
@@ -50,7 +52,7 @@ public class AuthController {
 
     // register and send email
     @PostMapping("/register")
-    public ResponseEntity<UserDto> register(@Valid @RequestBody UserDto userDto) throws Exception {
+    public ResponseEntity<?> register(@Valid @RequestBody UserDto userDto) throws Exception {
         UserDto savedUser = userService.createUser(userDto);
         // get details from the userDto
         String email = userDto.getEmail();
@@ -65,11 +67,14 @@ public class AuthController {
                 .build();
            sendMailService.sendMail(emailDetails);
 
-           //log success if email is sent
-              log.info("Email sent successfully to: " + email);
+        ApiResponse apiResponse = ApiResponse.builder()
+                .isSuccessful(true)
+                .body(savedUser)
+                .timeStamp(LocalDateTime.now())
+                .code("200")
+                .build();
 
-
-        return new ResponseEntity<>(savedUser, HttpStatus.CREATED);
+        return new ResponseEntity<>(apiResponse, HttpStatus.CREATED);
     }
     // login
     @PostMapping("/login")
