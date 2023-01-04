@@ -10,6 +10,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+
 @Service
 @Slf4j
 public class UserServiceImpl implements UserService {
@@ -33,7 +35,9 @@ public class UserServiceImpl implements UserService {
             throw new APIException("User already exists");
         }
 
-
+        //created_at date
+        LocalDateTime now = LocalDateTime.now();
+        userDto.setDateCreated(now);
         // encode the password
         userDto.setPassword(passwordEncoder.encode(userDto.getPassword()));
 
@@ -53,6 +57,7 @@ public class UserServiceImpl implements UserService {
         users.setName(userDto.getName());
         users.setEmail(userDto.getEmail());
         users.setPassword(userDto.getPassword());
+        users.setDateCreated(userDto.getDateCreated());
         return users;
     }
 
@@ -63,6 +68,7 @@ public class UserServiceImpl implements UserService {
         userDto.setName(savedUser.getName());
         userDto.setEmail(savedUser.getEmail());
         userDto.setPassword(savedUser.getPassword());
+        userDto.setDateCreated(savedUser.getDateCreated());
         return userDto;
     }
 }

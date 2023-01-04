@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
 
 
 @Data
@@ -28,4 +29,6 @@ public class Users {
     @Column(name="password", nullable = false)
     private String password;
 
+    @Column(name="created_at", nullable = true)
+    private LocalDateTime dateCreated;
 }
